@@ -1,0 +1,133 @@
+<style>
+  .point {
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  canvas {
+    width: 100%;
+  }
+</style>
+
+<div ref:root style="position: relative; width: {{width}}px; height: {{height}}px">
+  <canvas ref:canvas></canvas>
+</div>
+
+<script>
+  import {range} from 'd3-array';
+  import {IsometricProjector} from 'IsometricProjector.ts';
+  import {font as fontFunction} from 'ManifoldFunctions.ts';
+
+  export default {
+    data: function() {
+      return {
+        projector: new IsometricProjector(),
+        width: 100,
+        height: 100,
+        showBoundary: true,
+        canvas: undefined,
+        fn: fontFunction
+      }
+    },
+    computed: {
+      context: (canvas, width, height) => {
+        if (canvas) {
+          canvas.width = width;
+          canvas.height = height;
+          return canvas.getContext("2d");
+        }
+      },
+      render: (width, height, context, fn, projector, showBoundary) => {
+        if (context) {
+          projector.context = context;
+          context.clearRect(0, 0, width, height);
+          if (showBoundary) {
+            const unit = 0.4;
+            context.setLineDash([2, 2]);
+            context.closePath();
+            context.lineWidth = 1;
+            context.fillStyle = "hsl(200, 20%, 98%)";
+            context.strokeStyle = "hsl(0, 0%, 85%)";
+
+            // Bottom
+            context.beginPath();
+            projector.moveTo(+unit, +unit, -unit);
+            projector.lineTo(-unit, +unit, -unit);
+            projector.lineTo(-unit, -unit, -unit);
+            projector.lineTo(+unit, -unit, -unit);
+            context.closePath();
+            context.fill();
+            context.stroke();
+
+            context.beginPath();
+            projector.moveTo(+unit, +unit, -unit);
+            projector.lineTo(+unit, +unit, +unit);
+
+            projector.moveTo(-unit, +unit, -unit);
+            projector.lineTo(-unit, +unit, +unit);
+
+            projector.moveTo(-unit, -unit, -unit);
+            projector.lineTo(-unit, -unit, +unit);
+
+            projector.moveTo(+unit, -unit, -unit);
+            projector.lineTo(+unit, -unit, +unit);
+            context.stroke();
+
+            // Top
+            context.beginPath();
+            projector.moveTo(+unit, +unit, +unit);
+            projector.lineTo(-unit, +unit, +unit);
+            projector.lineTo(-unit, -unit, +unit);
+            projector.lineTo(+unit, -unit, +unit);
+            context.closePath();
+            context.stroke();
+
+            context.setLineDash([]);
+          }
+
+          // Surface
+          const divisions = range(-10, 10.1, 1).map(n => n / 25);
+          context.globalCompositeOperation = "darken";
+          context.beginPath();
+          context.lineWidth = 1;
+
+          divisions.forEach((y, i) => {
+            context.strokeStyle = i % 5 ? "hsl(200, 30%, 90%)" : "hsl(200, 30%, 75%)"
+            context.beginPath();
+            const {xp, yp, zp} = fn(divisions[0], y);
+            projector.moveTo(xp, yp, zp);
+            for (var ix = 1; ix < divisions.length; ix++) {
+              const ex = divisions[ix];
+              const {xp, yp, zp} = fn(ex, y);
+              projector.lineTo(xp, yp, zp);
+            }
+            context.stroke();
+          });
+
+          divisions.forEach((x, i) => {
+            context.strokeStyle = i % 5 ? "hsl(200, 30%, 90%)" : "hsl(200, 30%, 75%)"
+            context.beginPath();
+            const {xp, yp, zp} = fn(x, divisions[0]);
+            projector.moveTo(xp, yp, zp);
+            for (var iy = 1; iy < divisions.length; iy++) {
+              const ey = divisions[iy];
+              const {xp, yp, zp} = fn(x, ey);
+              projector.lineTo(xp, yp, zp);
+            }
+            context.stroke();
+          });
+
+        }
+      }
+    },
+    oncreate() {
+      this.set({canvas: this.refs.canvas});
+    },
+    methods: {
+      project: function(x0, y0) {
+        return {x: 0, y: 0};
+      }
+    }
+  }
+</script>

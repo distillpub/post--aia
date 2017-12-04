@@ -1,0 +1,194 @@
+<style>
+   .root {
+    position: relative;
+    contain: content;
+    margin: -2% 0;
+  }
+  .label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 13px;
+  }
+  .svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .svg text {
+    font-size: 13px;
+  }
+  circle {
+    fill-opacity: 0.3;
+  }
+  text.bolding {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .average {
+    fill-opacity: 0;
+    stroke: black;
+    stroke-width: 2px;
+    stroke-opacity: 0.4;
+    stroke-dasharray: 2 2;
+  }
+  .arrow {
+    stroke: black;
+    stroke-width: 1;
+    stroke-opacity: 0.5;
+    fill: none;
+  }
+</style>
+
+<:Window on:resize="resize()" on:scroll="scroll()"/>
+
+<div ref:root class="root">
+  <Manifold
+    ref:manifold
+    projector={{projector}}
+    width={{projector.width}}
+    height={{projector.height}}
+    showBoundary={{false}}
+    fn={{fn}}
+  />
+  <svg class="svg">
+    {{#each lightPointsProjected as point}}
+      <circle r="3" transform="translate({{point.x}},{{point.y}})"></circle>
+    {{/each}}
+    {{#each boldPointsProjected as point}}
+      <circle r="3" transform="translate({{point.x}},{{point.y}})"></circle>
+    {{/each}}
+    {{#each points as point}}
+      <path class="arrow" d="{{point.arrow}}"></path>
+    {{/each}}
+
+  </svg>
+  <!-- Samples -->
+  <div>
+      {{#each points as point}}
+        <SampleFlag
+          highlight={{point.i === 0}}
+          x={{point.point.x}}
+          y={{point.point.y}}
+          width={{40}}
+          model="{{model}}"
+          modelData="{{character}}"
+          sample="{{point.result}}"
+        />
+      {{/each}}
+    </div>
+</div>
+<!-- <img src="images/diagrams_boldify-vector-sampled.png"> -->
+
+<script>
+  import SampleFlag from 'SampleFlag.html';
+  import {interpolateLinear, linearCombinationNormalized, linearCombination, direction} from 'Utils.ts';
+  import {Array1D, Scalar} from 'deeplearn';
+  import {serif, casual, sans} from 'FontExamples.ts';
+  import {range, mean} from 'd3-array';
+  import Manifold from 'Manifold.html';
+  import {generateArrow} from 'Arrows.ts';
+  import {IsometricProjector} from 'IsometricProjector.ts';
+  import {onscroll} from 'ScrollPosition.ts';
+
+  const ip = new IsometricProjector();
+
+  export default {
+    components: {
+      SampleFlag, Manifold
+    },
+    oncreate() {
+      setTimeout(() => {this.resize();}, 200);
+    },
+    data: function() {
+      return {
+        width: 400,
+        pointA: sans,
+        localPointA: Array1D.new([0, -0.2]),
+        character: "A",
+        steps: 5,
+        radius: 0.025,
+        lightPoints: [],
+        boldPoints: [],
+        fn: function(xp, yp){ return {xp, yp, zp:0}; }
+      }
+    },
+    computed: {
+      height: width => width / 1.5,
+      projector: (width, height, angle) => {
+        ip.width = width;
+        ip.height = height;
+        ip.angle = angle;
+        return ip;
+      },
+      lightPointsProjected: (projector, lightPoints) => lightPoints.map(p => projector.project(p[0], p[1], 0)),
+      lightAverage: (lightPoints) => {
+          return Array1D.new([
+            mean(lightPoints, p => p[0]),
+            mean(lightPoints, p => p[1])
+          ]);
+      },
+      lightAverageProjected: (lightAverage, projector) => projector.project(lightAverage.get(0), lightAverage.get(1), 0),
+      boldPointsProjected: (boldPoints, projector) => boldPoints.map(p => projector.project(p[0], p[1], 0)),
+      boldAverage: (boldPoints) => {
+        return Array1D.new([
+          mean(boldPoints, p => p[0]),
+          mean(boldPoints, p => p[1])
+        ]);
+      },
+      boldAverageProjected: (boldAverage, projector) => projector.project(boldAverage.get(0), boldAverage.get(1), 0),
+
+      localAnalogy: (lightAverage, boldAverage) => {
+        return direction(lightAverage, boldAverage);
+      },
+      pointData: (steps, analogy, pointA) => {
+        if(analogy) {
+          const arr = [-0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3].reverse().map(i => {
+            const amount = Scalar.new(i);
+            return {
+              i: i,
+              amount: amount,
+              result: linearCombinationNormalized(pointA, analogy.direction, amount)
+            };
+          });
+          return arr;
+        } else {
+          return [];
+        }
+      },
+      points: (pointData, localPointA, localAnalogy, projector) => {
+        const arr = pointData.map(i => {
+          const localPoint = linearCombination(localPointA, localAnalogy, i.amount);
+          const projectedPoint = projector.project(localPoint.get(0), localPoint.get(1), 0);
+
+          const shapes = generateArrow(localPointA.get(0), localPointA.get(1), localPoint.get(0), localPoint.get(1), .012, 0, 0.01)
+            .map(shape => {
+              return shape.map(p => {
+                return projector.project(p[0], p[1], 0);
+              });
+            });
+
+          i.point = projectedPoint;
+          if (i.i != 0) {
+            i.arrow = "M" + shapes.map(shape => shape.map(p => p.x + ", " + p.y).join("L"));
+          } else {
+            i.arrow = "";
+          }
+          return i;
+        });
+        return arr;
+      }
+    },
+
+    methods: {
+      scroll: onscroll,
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width});
+      }
+    }
+
+  }
+</script>

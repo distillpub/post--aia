@@ -1,0 +1,165 @@
+<style>
+.root {
+  width: 100%;
+  max-width: 890px;
+  margin: 0 auto;
+}
+.container {
+  padding: 0 20px;
+}
+h4 {
+  margin-top: 0;
+}
+
+.buckets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 20px;
+  margin-top: 20px;
+}
+
+.extrapolations {
+  grid-column-end: span 2;
+}
+
+.extrapolations span {
+  display: inline-block;
+  text-align: left;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1.5fr;
+  grid-column-gap: 20px;
+}
+
+</style>
+<div class="root">
+  <div class="container">
+  <div>
+    <Chooser
+      model="{{model}}"
+      on:select="changeSelected(event)"
+      character="{{character}}"
+    />
+  </div>
+  <div class="buckets">
+    {{#each buckets as bucket}}
+    <div>
+      <Bucket
+        label={{bucket.label}}
+        model="{{model}}"
+        character="{{character}}"
+        bind:samples="bucket.samples"
+      />
+    </div>
+    {{/each}}
+  </div>
+  <div class="controls">
+    <div>
+      <h4>Starting font</h4>
+      <BaseChooser
+        model="{{model}}"
+        on:select="changeSelected(event)"
+        baseFonts="{{baseFonts}}"
+        />
+    </div>
+    <div>
+      <h4>Apply your new tool</h4>
+      <Slider
+        min="{{-1}}"
+        max="{{1}}"
+        bind:value="toolMagnitude"
+        step="0.05"
+      />
+    </div>
+    <div>
+      <h4>Result</h4>
+      <Alphabet
+        model="{{model}}"
+        sample="{{outputSample}}"
+      />
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+  import Alphabet from "Alphabet.html";
+  import Bucket from "Bucket.html";
+  import Chooser from "FontChooserSmall.html";
+  import Slider from "Slider.html";
+  import BaseChooser from "FontChooser.html";
+  import Sample from "Sample.html";
+  import {average, unit, linearCombinationNormalized} from "Utils.ts";
+  import {Array1D, Scalar, NDArrayMathCPU} from 'deeplearn';
+
+  const math = new NDArrayMathCPU(false);
+
+  export default {
+    components: {
+      Alphabet,
+      Bucket,
+      Chooser,
+      Slider,
+      BaseChooser,
+      Sample
+    },
+    data() {
+      return {
+        model: undefined,
+        direction: undefined,
+        character: "A",
+        toolMagnitude: 0.25,
+        userTool: {},
+        fonts: [],
+
+        baseFonts: [],
+        buckets: [{label:"sans-serif", samples:[]}, {label:"serif", samples:[]}],
+        extrapolations: [-0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]
+      }
+    },
+    computed: {
+      typefaces: (baseFonts, model) => {
+        if (model) {
+          return baseFonts
+        } else {
+          return [];
+        }
+      },
+      direction: (model, buckets) => {
+        if (buckets[0].samples.length || buckets[1].samples.length) {
+          const leftAverage = buckets[0].samples.length ? average(buckets[0].samples) : Array1D.zeros([model.dimensions]);
+          const rightAverage = buckets[1].samples.length ? average(buckets[1].samples) : Array1D.zeros([model.dimensions]);
+          return unit(math.sub(rightAverage, leftAverage));
+        }
+      },
+      outputSample: (model, direction, selectedSample, toolMagnitude) => {
+        if (direction && selectedSample) {
+          return linearCombinationNormalized(selectedSample, direction, Scalar.new(toolMagnitude))
+        } else {
+          return selectedSample;
+        }
+      },
+      extrapolationSamples: (extrapolations, typefaces, direction) => {
+        if (direction && typefaces) {
+          const output = typefaces.map((t) => {
+            const samples = extrapolations.map(e => {
+              return linearCombinationNormalized(t, direction, Scalar.new(e))
+            });
+            return samples;
+          });
+          return output;
+        } else {
+          return [[]];
+        }
+      }
+    },
+    methods: {
+      changeSelected: function(selectedSample) {
+        this.set({selectedSample})
+      }
+    }
+
+  }
+</script>

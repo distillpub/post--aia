@@ -1,0 +1,99 @@
+<style>
+  .root {
+    position: relative;
+    contain: content;
+    margin: -2% 0;
+  }
+</style>
+
+<:Window on:resize="resize()" on:scroll="scroll()"/>
+
+<div ref:root class="root">
+  <Manifold
+    ref:manifold
+    projector={{projector}}
+    width={{width}}
+    height={{projector.height}}
+    showBoundary={{false}}
+    fn={{fn}}
+  />
+  {{#each images as image}}
+    <Flag x={{image.x}} y={{image.y}} width="60" height="60">
+      <img src="{{image.src}}">
+    </Flag>
+  {{/each}}
+</div>
+
+<script>
+
+  import SampleFlag from 'SampleFlag.html';
+  import {interpolateLinear, linearCombinationNormalized, linearCombination, direction} from 'Utils.ts';
+  import {Array1D, Scalar} from 'deeplearn';
+  import {range, mean} from 'd3-array';
+  import Manifold from 'Manifold.html';
+  import {generateArrow} from 'Arrows.ts';
+  import {IsometricProjector} from 'IsometricProjector.ts';
+  import {image as imageFunction} from 'ManifoldFunctions.ts';
+  import Flag from 'Flag.html';
+  import {onscroll} from 'ScrollPosition.ts';
+
+  const ip = new IsometricProjector();
+
+  export default {
+    components: {
+      Manifold, Flag
+    },
+    data() {
+      return {
+        width: 400,
+        fn: imageFunction,
+        imageData: [
+          // [+0.2, +0.2, "07"],
+          [-0.25, +0.15, "03"],
+          // [-0.2, +0.2, "09"],
+          // [-0.2, -0.2, "01"],
+        ]
+      };
+    },
+    computed: {
+      height: width => width / 1.5,
+      projector: (width, height, angle) => {
+        ip.width = width;
+        ip.height = height;
+        ip.angle = angle;
+        return ip;
+      },
+      imageDataProcessed: (imageData, fn) => {
+        return imageData.map(d => {
+          const {xp, yp, zp} = fn(d[0], d[1]);
+          return {
+            xp: xp,
+            yp: yp,
+            zp: zp,
+            src: "images/mountain-sample-" + d[2] + ".jpg"
+          };
+        });
+      },
+      images: (projector, imageDataProcessed, fn) => {
+        imageDataProcessed.forEach(d => {
+          const p = projector.project(d.xp, d.yp, d.zp);
+          d.x = p.x;
+          d.y = p.y;
+        });
+        return imageDataProcessed;
+      }
+    },
+
+    oncreate() {
+      setTimeout(() => {this.resize();}, 200);
+    },
+    methods: {
+      scroll: onscroll,
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width});
+      }
+    }
+  }
+
+</script>

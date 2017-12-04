@@ -1,0 +1,113 @@
+<style>
+  .stage {
+    position: relative;
+  }
+  canvas {
+    image-rendering: pixelated;
+  }
+  .interpolation {
+    position: absolute;
+    top: 30px;
+  }
+
+  .svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .svg path {
+    fill: none;
+    stroke: hsl(0, 0%, 80%);
+    stroke-opacity: 0.6;
+    stroke-dasharray: 4 2;
+    shape-rendering: crispEdges;
+  }
+  .svg .original {
+    fill: none;
+    stroke: rgb(255, 100, 0);
+    stroke-width: 2px;
+  }
+  .svg text {
+    font-size: 12px;
+    text-transform: uppercase;
+    text-anchor: middle;
+  }
+</style>
+
+<:Window on:resize="resize()" />
+
+<div ref:root class="stage" style="height: {{imageWidth * 1.4}}px;">
+
+  <div class="interpolation">
+    {{#each points as point}}
+      <div style="display: inline-block;">
+        <Sample
+          displayWidth={{imageWidth}}
+          displayHeight={{imageWidth}}
+          model="{{model}}"
+          modelData="{{modelData}}"
+          sample="{{point.result}}"
+        />
+      </div>
+    {{/each}}
+  </div>
+
+  <svg class="svg" >
+    <g transform="translate(0, 33)">
+      <rect class="original" x="{{imageWidth * Math.floor(points.length / 2)}}" y="-10" width="{{imageWidth}}" height="{{imageWidth}}" rx="4"></rect>
+      <text dx="{{width / 2}}" dy="-20">original</text>
+      <path transform="translate(0, 0)" d="M0,0 L{{width}},0" />
+      <path transform="translate(0, {{imageWidth / 2.2}})" d="M0,0 L{{width}},0" />
+      <path transform="translate(0, {{imageWidth * 0.7}})" d="M0,0 L{{width}},0" />
+    </g>
+  </svg>
+
+</div>
+
+<script>
+  import Sample from 'Sample.html';
+  import {interpolateLinear, linearCombinationNormalized} from 'Utils.ts';
+  import {Array1D, Scalar} from 'deeplearn';
+  import {sans as exampleA, serifBlack as exampleB} from 'FontExamples.ts';
+  import {range} from 'd3-array';
+
+  export default {
+    components: {
+      Sample
+    },
+    data() {
+      return {
+        width: 300,
+        steps: [-0.4, -0.2, -0.1, 0, 0.1, 0.2, 0.4]
+      }
+    },
+    computed: {
+      imageWidth: (width, points) => points.length ? width / points.length : 0,
+      points: (sample, steps, analogy) => {
+        if(analogy) {
+          const arr = steps.map(i => {
+            const amount = Scalar.new(i);
+            return {
+              result: linearCombinationNormalized(sample, analogy.direction, amount)
+            };
+          })
+          return arr;
+        } else {
+          return [];
+        }
+      }
+    },
+    oncreate() {
+      this.resize();
+    },
+    methods: {
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width});
+      }
+    }
+  }
+</script>

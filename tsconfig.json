@@ -1,0 +1,14 @@
+{
+  "exclude": [
+    "node_modules",
+    "public",
+    ".git"
+  ],
+  "compilerOptions": {
+    "sourceMap": true,
+    "allowJs": true,
+    "noImplicitAny": false,
+    "target": "es6",
+    "moduleResolution": "node"
+  }
+}

@@ -1,0 +1,71 @@
+<style>
+  .sample {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .sample-outline :first-child {
+    display: block;
+    position: relative;
+    top: 2px;
+  }
+  .sample-outline {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: white;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  .highlight .sample-outline {
+    border: 2px solid rgb(255, 100, 0);
+  }
+  .sample .pointer {
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 0;
+    height: 12px;
+    border-left: 1px solid black;
+  }
+  .highlight .pointer {
+    border-left: 2px solid rgb(255, 100, 0);
+  }
+
+  .dot {
+    background: black;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    left: -3px;
+    top: -3px;
+  }
+  .highlight .dot {
+    background: rgb(255, 100, 0);
+  }
+</style>
+
+<div class="sample {{highlight ? 'highlight' : ''}}" style="transform: translate({{x}}px, {{y}}px);">
+    <div class="dot"></div>
+    <div class="sample-outline" style="left: {{-width / 2 - (highlight ? 3 : 1)}}px;">
+      <Sample
+        displayWidth={{width}}
+        displayHeight={{width}}
+        model="{{model}}"
+        modelData="{{modelData}}"
+        sample="{{sample}}"
+      />
+      <div class="pointer"></div>
+    </div>
+  </div>
+
+<script>
+  import Sample from './Sample.html';
+  export default {
+    components: {
+      Sample
+    }
+  }
+</script>

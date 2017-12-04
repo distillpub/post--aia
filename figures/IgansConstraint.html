@@ -1,0 +1,152 @@
+
+<style>
+  .root {
+    position: relative;
+    contain: content;
+    margin: -2% 0;
+  }
+  svg {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+  figcaption {
+    width: 20%;
+    max-width: 200px;
+    position: absolute;
+    left: 0;
+    top: 10px;
+    background: white;
+    z-index: 10;
+    padding-bottom: 8px;
+  }
+</style>
+
+<:Window on:resize="resize()" on:scroll="scroll()"/>
+
+
+<figcaption>Subspace of all images that satisfy the mountain constraint</figcaption>
+<div ref:root class="root">
+  <Manifold
+    ref:manifold
+    projector={{projector}}
+    width={{width}}
+    height={{projector.height}}
+    showBoundary={{false}}
+    fn={{fn}}
+  />
+
+  <svg>
+    <path d={{constraintPath}} fill="rgb(255, 100, 0)" fill-opacity="0.5"></path>
+    <path d={{pointerPath}} stroke="black" fill="none" stroke-opacity="0.4"></path>
+  </svg>
+
+  {{#each images as image}}
+    <Flag x={{image.x}} y={{image.y}} width="60" height="60" >
+      <img src="{{image.src}}">
+    </Flag>
+  {{/each}}
+</div>
+
+<script>
+
+  import SampleFlag from 'SampleFlag.html';
+  import {interpolateLinear, linearCombinationNormalized, linearCombination, direction} from 'Utils.ts';
+  import {Array1D, Scalar} from 'deeplearn';
+  import {range} from 'd3-array';
+  import Manifold from 'Manifold.html';
+  import {generateArrow} from 'Arrows.ts';
+  import {IsometricProjector} from 'IsometricProjector.ts';
+  import {image as imageFunction} from 'ManifoldFunctions.ts';
+  import Flag from 'Flag.html';
+  import {onscroll} from 'ScrollPosition.ts';
+
+  const ip = new IsometricProjector();
+
+  export default {
+    components: {
+      Manifold, Flag
+    },
+    data() {
+      return {
+        width: 400,
+        fn: imageFunction,
+        constraintFn: x => {
+          return {x: x * 0.6, y: x};
+        }
+      };
+    },
+    computed: {
+      height: width => width / 1.5,
+      projector: (width, height, angle) => {
+        ip.width = width;
+        ip.height = height;
+        ip.angle = angle;
+        return ip;
+      },
+      imageData: (constraintFn) => {
+        return [
+          [+0.2, "05"],
+          [-0.0, "04"],
+          [-0.2, "06"],
+        ].map(d => {
+          const p = constraintFn(d[0]);
+          return [p.x, p.y, d[1]]
+        });
+      },
+      pointerPath: (fn, constraintFn, projector, width) => {
+        const pl = constraintFn(0.35);
+        const {xp, yp, zp} = fn(pl.x, pl.y);
+        const p = projector.project(xp, yp, zp);
+        return `M${width / 10},25 L${width / 10}, ${p.y} L${p.x}, ${p.y}`;
+      },
+      constraintPoints: (fn, constraintFn, projector) => {
+        return sampleFunction(fn, constraintFn, projector);
+      },
+      constraintPath: (constraintPoints) => {
+        return "M" + constraintPoints.map(p => p.x + "," + p.y).join("L") + "Z";
+      },
+      images: (projector, imageData, fn) => {
+        return imageData.map(d => {
+          const {xp, yp, zp} = fn(d[0], d[1]);
+          const p = projector.project(xp, yp, zp);
+          return {
+            x: p.x,
+            y: p.y,
+            src: "images/mountain-sample-" + d[2] + ".jpg"
+          };
+        })
+      }
+    },
+
+    oncreate() {
+      setTimeout(() => {this.resize();}, 200);
+    },
+    methods: {
+      scroll: onscroll,
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width});
+      }
+    }
+  }
+
+  function sampleFunction(fn, cfn, projector) {
+    const offset = 0.015;
+    const points = range(-0.4, 0.41, 0.01).map(x => {
+      return cfn(x);
+    });
+    let edges = [];
+    points.forEach(p => {
+      const mp = fn(p.x - offset , p.y);
+      edges.push(projector.project(mp.xp, mp.yp, mp.zp))
+    });
+    points.reverse().forEach(p => {
+      const mp = fn(p.x + offset, p.y);
+      edges.push(projector.project(mp.xp, mp.yp, mp.zp))
+    });
+    return edges;
+  }
+
+</script>

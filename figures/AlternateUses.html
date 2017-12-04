@@ -1,0 +1,177 @@
+<style>
+  .root {
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  @media(min-width: 600px) {
+    .root {
+      max-width: 760px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-gap: 50px;
+    }
+  }
+
+  h4 {
+    text-align: center;
+  }
+  .title {
+    height: 190px;
+  }
+  .quote {
+    font-family: georgia, serif;
+    text-align: center;
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.5em;
+    color: rgba(0, 0, 0, 0.5);
+  }
+  .label {
+    margin-top: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.3em;
+  }
+  d-slider {
+    width: 100%;
+  }
+  .examples {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    text-align: center;
+  }
+  .note {
+    margin-top: 12px;
+    grid-column-end: span 2;
+    font-size: 10px;
+    line-height: 1.5em;
+    text-align: left;
+    color: rgba(0, 0, 0, 0.4);
+  }
+  .output {
+    text-align: center;
+    overflow: hidden;
+  }
+  .output img {
+    height: 140px;
+    width: auto;
+    margin: auto 0;
+  }
+
+  .output.molecule img {
+    height: 180px;
+    top: -20px;
+    position: relative;
+  }
+  .output > * {
+    display: none;
+  }
+  .output.index-0 > :nth-child(1) {
+    display: inline-block;
+  }
+  .output.index-1 > :nth-child(2) {
+    display: inline-block;
+  }
+  .output.index-2 > :nth-child(3) {
+    display: inline-block;
+  }
+  .output.index-3 > :nth-child(4) {
+    display: inline-block;
+  }
+  .output.index-4 > :nth-child(5) {
+    display: inline-block;
+  }
+</style>
+
+<div class="root">
+  <div class="column">
+    <div class="title">
+      <h4>Faces</h4>
+      <div class="output index-{{faceIndex}}">
+        <img src="images/smile-0.jpg">
+        <img src="images/smile-1.jpg">
+        <img src="images/smile-2.jpg">
+        <img src="images/smile-3.jpg">
+        <img src="images/smile-4.jpg">
+      </div>
+    </div>
+    <Slider min="0" max="4" origin="2" step="1" ticks="5" bind:value="faceIndex"></Slider>
+    <div class="label">Smiling</div>
+    <div class="examples">
+      <div></div>
+      <div></div>
+      <div class="note">
+        Images from <em>Sampling Generative Networks</em> by <d-cite key="White2016a">White</d-cite>.
+      </div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="title">
+      <h4>Sentences</h4>
+      <div class="output index-{{sentenceIndex}}">
+        <div class="quote">
+          “It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.”
+        </div>
+        <div class="quote">
+          “It is universally acknowledged that a rich, single man, must be in want of a wife.”
+        </div>
+        <div class="quote">
+          “Everyone knows that a rich, single man must want a wife.”
+        </div>
+        <div class="quote">
+          “A rich, single man obviously must want a wife.”
+        </div>
+        <div class="quote">
+          “A single man must want a wife.”
+        </div>
+      </div>
+    </div>
+    <Slider min="0" max="4" origin="2" step="1" ticks="5" bind:value="sentenceIndex"></Slider>
+    <div class="label">Length</div>
+    <div class="examples">
+      <div></div>
+      <div></div>
+      <div class="note">Sentence from <em>Pride and Prejudice</em> by Jane Austen. Interpolated by the authors. Inspired by experiments done by the novelist <d-cite key="Sloan2017">Robin Sloan</d-cite></div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="title">
+      <h4>Molecules</h4>
+      <div class="output molecule index-{{moleculeIndex}}">
+        <img src="images/molecule-0.png">
+        <img src="images/molecule-1.png">
+        <img src="images/molecule-2.png">
+        <img src="images/molecule-3.png">
+      </div>
+    </div>
+    <Slider min="0" max="3" origin="2" step="1" ticks="4" bind:value="moleculeIndex"></Slider>
+    <div class="label">Delayed fluorescence decay rate</div>
+    <div class="examples">
+      <div></div>
+      <div></div>
+      <div class="note">
+        Images from <em>Automatic chemical design using a data-driven continuous representation of molecules</em> by <d-cite key="GomezBombarelli2016">Gómez-Bombarelli <em>et al</em></d-cite>.
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+  import Slider from 'Slider.html';
+
+  export default {
+    components: {
+      Slider
+    },
+    data() {
+      return {
+        faceIndex: 0,
+        sentenceIndex: 0,
+        moleculeIndex: 0
+      }
+    }
+  }
+</script>

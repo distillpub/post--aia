@@ -1,0 +1,94 @@
+<style>
+  .root {
+    padding: 0;
+    max-width: 704px;
+    margin: 0 auto;
+    contain: content;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid hsla(0, 0%, 0%, 0.1);
+    padding: 18px 0;
+  }
+  .row h4 {
+    grid-column-end: span 2;
+    margin: 0 0 18px 18px;
+    padding: 0;
+  }
+  @media(min-width: 600px) {
+    .row {
+      grid-template-columns: 100px 1fr 1fr;
+    }
+    .row h4 {
+      margin: 0;
+      grid-column-end: span 1;
+    }
+  }
+  .row:first-child {
+    padding-top: 0;
+  }
+  .row:last-child {
+    border: none;
+  }
+  div.column {
+    padding: 0 20px;
+  }
+  div.row > div.column:nth-child(2n) {
+    border-right: solid 1px rgba(0, 0, 0, 0.2);
+  }
+</style>
+
+<div class="root">
+  {{#each analogies as analogy}}
+  <div class="row">
+    <h4>{{analogy.label}}</h4>
+    {{#each [analogy.leftSamples, analogy.rightSamples] as column, i}}
+    <div class="column">
+        {{#each column as sample}}
+          <Sample
+            model={{model}}
+            modelData={{character}}
+            sample={{sample}}
+            displayWidth="28"
+            displayHeight="28"
+          />
+        {{/each}}
+      </div>
+    {{/each}}
+  </div>
+  {{/each}}
+</div>
+
+<script>
+  import Sample from "Sample.html";
+
+  export default {
+    components: {
+      Sample,
+    },
+    data() {
+      return {
+        model: null,
+        character: "A",
+        fonts: [],
+        analogies: []
+      }
+    },
+    computed: {
+      selectedSample: (model) => {
+        if (model) {
+        } else {
+        }
+      }
+    },
+    oncreate() {
+    },
+    methods: {
+      changeSelected(event) {
+        this.set({selectedSample: event.selectedSample});
+      }
+    }
+
+  }
+</script>

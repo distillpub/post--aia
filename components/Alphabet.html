@@ -1,0 +1,29 @@
+<style>
+  .character {
+    display: inline;
+  }
+</style>
+<div>
+{{#each "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("") as char}}
+  <div class="character">
+    <Sample
+      displayWidth={{48}}
+      displayHeight={{48}}
+      model="{{model}}"
+      modelData="{{char}}"
+      sample="{{sample}}"
+      on:select="fire('select', event)"
+    />
+  </div>
+  {{/each}}
+</div>
+
+<script>
+import Sample from "./Sample.html";
+
+export default {
+  components: {
+    Sample
+  }
+}
+</script>

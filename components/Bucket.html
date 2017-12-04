@@ -1,0 +1,118 @@
+<style>
+    .root {
+      display: block;
+      margin-bottom: 24px;
+    }
+    .column-container {
+      width: 50%;
+      margin: 0 12px 0 0;
+    }
+    .column canvas {
+      mix-blend-mode: multiply;
+    }
+    .column {
+      border: 1px dashed rgba(0, 0, 0, 0.5);
+      padding: 12px;
+      border-radius: 4px;
+      background-color: rgba(0, 0, 0, 0.03);
+      box-shadow: inset 0 1px 7px rgba(0, 0, 0, 0.1);
+      min-height: 40px;
+      position: relative;
+    }
+    .column.active {
+      border-color: rgb(255, 100, 0);
+    }
+    .prompt {
+      color: rgba(0, 0, 0, 0.4);
+      font-size: 15px;
+      display: none;
+      pointer-events: none;
+      text-align: center;
+      position: absolute;
+      width: 100%;
+      top: calc(50% - 13px);
+    }
+    .prompt.visible {
+      display: block;
+    }
+    .sample {
+      display: inline-block;
+      position: relative;
+    }
+
+    .sample button {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: none;
+      z-index: 1000;
+    }
+    .sample:hover button {
+      display: block;
+    }
+    </style>
+
+    <div class="root">
+      <div class="column {{active ? 'active' : ''}}" on:drop="ondrop(event)" on:dragover="ondragover(event)" on:dragenter="ondragenter(event)" on:dragleave="ondragleave(event)">
+        <span class="prompt {{samples.length === 0 ? 'visible' : ''}}">Drag <b>{{label}}</b> examples here</span>
+        {{#each samples as s, i}}
+          <div class="sample" style="width: {{30}}px; height: {{30}}px;">
+            <button on:click="onremove(event, i)">X</button>
+            <Sample
+              displayWidth={{30}}
+              displayHeight={{30}}
+              model="{{model}}"
+              modelData="{{character}}"
+              sample="{{s}}"
+            />
+          </div>
+        {{/each}}
+      </div>
+    </div>
+
+    <script>
+      import Sample from './Sample.html';
+      import {Array1D} from 'deeplearn';
+
+      export default {
+        components: {
+          Sample
+        },
+        data() {
+          return {
+            model: undefined,
+            character: "A",
+            samples: []
+          }
+        },
+        oncreate() {
+        },
+        methods: {
+          onremove: function(event, i) {
+            const {samples} = this.get();
+            samples.splice(i, 1)
+            this.set({samples});
+          },
+          ondrop: function(event, i) {
+            event.preventDefault();
+            const {samples, model} = this.get();
+            let arrayString = event.dataTransfer.getData("array");
+            let array = JSON.parse(arrayString);
+            let example = Array1D.new(array)
+            samples.push(example);
+            this.set({samples: samples, active: false});
+          },
+          ondragover: function(event) {
+            event.preventDefault();
+          },
+          ondragenter: function(event) {
+            event.preventDefault();
+            this.set({active: true});
+          },
+          ondragleave: function(event) {
+            event.preventDefault();
+            this.set({active: false});
+          }
+        }
+      }
+    </script>

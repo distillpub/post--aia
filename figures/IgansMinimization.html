@@ -1,0 +1,180 @@
+<style>
+  .root {
+    position: relative;
+    contain: content;
+    margin: -2% 0;
+  }
+  svg {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .arrow {
+    fill: none;
+    stroke: black;
+  }
+
+  .dashed-arrow {
+    fill: none;
+    stroke: black;
+    stroke-opacity: 0.8;
+    stroke-dasharray: 2 2;
+  }
+</style>
+
+<:Window on:resize="resize()" on:scroll="scroll()"/>
+
+
+<div ref:root class="root">
+  <Manifold
+    ref:manifold
+    projector={{projector}}
+    width={{width}}
+    height={{projector.height}}
+    showBoundary={{false}}
+    fn={{fn}}
+  />
+
+  <svg>
+    <path d={{constraintPath}} fill="rgb(255, 100, 0)" fill-opacity="0.5"></path>
+    <circle cx={{target.x}} cy={{target.y}} r=7 fill="none" stroke="black"></circle>
+    <!-- <path d={{secondConstraintPath}} fill="rgb(255, 100, 0)" fill-opacity="0.3" stroke="rgb(255, 100, 0)"></path> -->
+    <path class="arrow" d="{{arrow}}"></path>
+    <path class="dashed-arrow" d="{{dottedLine}}"></path>
+  </svg>
+
+  {{#each images as image}}
+    <Flag x={{image.x}} y={{image.y}} width="60" height="60" >
+      <img src="{{image.src}}">
+    </Flag>
+  {{/each}}
+</div>
+
+<script>
+
+  import SampleFlag from 'SampleFlag.html';
+  import {interpolateLinear, linearCombinationNormalized, linearCombination, direction} from 'Utils.ts';
+  import {Array1D, Scalar} from 'deeplearn';
+  import {range} from 'd3-array';
+  import Manifold from 'Manifold.html';
+  import {generateArrow} from 'Arrows.ts';
+  import {IsometricProjector} from 'IsometricProjector.ts';
+  import {image as imageFunction} from 'ManifoldFunctions.ts';
+  import Flag from 'Flag.html';
+  import {onscroll} from 'ScrollPosition.ts';
+
+  const ip = new IsometricProjector();
+
+  export default {
+    components: {
+      Manifold, Flag
+    },
+    data() {
+      return {
+        width: 400,
+        fn: imageFunction,
+        constraintFn: x => {
+          return {x: x * 0.6, y: x};
+        },
+        inverseFn: x => {
+          return {x: -x / 0.6, y: x};
+        }
+      };
+    },
+    computed: {
+      height: width => width / 1.5,
+      projector: (width, height, angle) => {
+        ip.width = width;
+        ip.height = height;
+        ip.angle = angle;
+        return ip;
+      },
+      target: (inverseFn, projector, fn) => {
+        const p = inverseFn(0);
+        const {xp, yp, zp} = fn(p.x, p.y);
+        return projector.project(xp, yp, zp);
+      },
+      imageData: (inverseFn) => {
+        const s = inverseFn(0.06);
+        const e = inverseFn(0.15)
+        return [
+          [s.x, s.y, "09"],
+          [e.x, e.y, "03"],
+        ];
+      },
+      constraintPoints: (fn, constraintFn, projector) => {
+        return sampleFunction(fn, constraintFn, projector);
+      },
+      constraintPath: (constraintPoints) => {
+        return "M" + constraintPoints.map(p => p.x + "," + p.y).join("L") + "Z";
+      },
+      images: (projector, imageData, fn) => {
+        return imageData.map(d => {
+          const {xp, yp, zp} = fn(d[0], d[1]);
+          const p = projector.project(xp, yp, zp);
+          return {
+            x: p.x,
+            y: p.y,
+            src: "images/mountain-sample-" + d[2] + ".jpg"
+          };
+        })
+      },
+      dottedLine: (projector, imageData, fn, inverseFn) => {
+        const s = {x: imageData[0][0], y: imageData[0][1]};
+        const t = inverseFn(0);
+        const line = range(t.y, s.y + 0.01, 0.01).map(y => inverseFn(y)).map(p => [p.x, p.y]);
+        const lines = line.map(p => {
+          const point = fn(p[0], p[1])
+          return projector.project(point.xp, point.yp, point.zp);
+        });
+        return "M" + lines.map(p => p.x + ", " + p.y).join("L");
+      },
+      arrow : (projector, imageData, fn, inverseFn) => {
+        const s = {x: imageData[1][0], y: imageData[1][1]};
+        const e = {x: imageData[0][0], y: imageData[0][1]};
+        const ePlus = inverseFn(e.y + 0.01);
+        let shapes = generateArrow(ePlus.x, ePlus.y, e.x, e.y, .012, 0.01, 0.01);
+        const line = range(e.y, s.y + 0.01, 0.01).map(y => inverseFn(y)).map(p => [p.x, p.y]);
+        shapes.push(line);
+        shapes = shapes.map(shape => {
+          return shape.map(p => {
+            const point = fn(p[0], p[1])
+            return projector.project(point.xp, point.yp, point.zp);
+          });
+        });
+        return "M" + shapes.map(shape => shape.map(p => p.x + ", " + p.y).join("L")).join("M")
+        // return "";
+      }
+    },
+
+    oncreate() {
+      setTimeout(() => {this.resize();}, 200);
+    },
+    methods: {
+      scroll: onscroll,
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width});
+      }
+    }
+  }
+
+  function sampleFunction(fn, cfn, projector) {
+    const offset = 0.015;
+    const points = range(-0.4, 0.41, 0.01).map(x => {
+      return cfn(x);
+    });
+    let edges = [];
+    points.forEach(p => {
+      const mp = fn(p.x - offset , p.y);
+      edges.push(projector.project(mp.xp, mp.yp, mp.zp))
+    });
+    points.reverse().forEach(p => {
+      const mp = fn(p.x + offset, p.y);
+      edges.push(projector.project(mp.xp, mp.yp, mp.zp))
+    });
+    return edges;
+  }
+
+</script>

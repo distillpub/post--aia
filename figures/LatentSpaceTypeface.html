@@ -1,0 +1,133 @@
+<style>
+  .root {
+    display: grid;
+    position: relative;
+    grid-template-columns: 1fr 1fr;
+    max-width: 800px;
+    margin: 0 auto;
+    contain: content;
+  }
+  canvas {
+    width: 100%;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+  svg path {
+    stroke: black;
+    stroke-opacity: 0.3;
+    fill: none;
+  }
+  svg text {
+    font-size: 12px;
+    fill-opacity: 0.4;
+  }
+</style>
+
+<:Window on:resize="resize()" on:scroll="scroll()"/>
+
+<div ref:root class="root">
+  <div>
+    <Manifold
+      ref:low
+      projector={{projector}}
+      width={{projector.width}}
+      height={{projector.height}}
+      showBoundary={{false}}
+      fn={{function(xp, yp){ return {xp, yp, zp:0}; }}}
+    />
+  </div>
+  <div>
+    <Manifold
+      ref:high
+      projector={{projector}}
+      width={{projector.width}}
+      height={{projector.height}}
+      fn={{fn}}
+    />
+  </div>
+  <svg>
+    <g transform="translate({{pl.x}},{{pl.y}})">
+      <circle r="3"></circle>
+    </g>
+    <g transform="translate({{ph.x}},{{ph.y}})">
+      <circle r="3"></circle>
+    </g>
+    <path ref:arrow d={{line}}></path>
+    <path ref:arrowHead d="M-6,-6L0,0L6,-6" transform="translate({{ph.x}},{{ph.y - 7}})"></path>
+    <text text-anchor="middle" transform="translate({{(pl.x + ph.x) / 2}},{{pl.y - 40 - 10}})">Neural network</text>
+  </svg>
+</div>
+
+<script>
+  import Manifold from 'Manifold.html';
+  import {IsometricProjector} from 'IsometricProjector.ts';
+  import {onscroll} from 'ScrollPosition.ts';
+
+
+  const ip = new IsometricProjector();
+
+  export default {
+    components: {
+      Manifold
+    },
+    data: function() {
+      return {
+        width: 400,
+      }
+    },
+    computed: {
+      height: width => width * 1.1,
+      projector: (width, height, angle) => {
+        ip.width = width;
+        ip.height = height;
+        ip.angle = angle;
+        return ip;
+      },
+      pl: (width, projector) => {
+        return projector.project(0.4, 0.2, 0);
+      },
+      ph: (width, projector, fn) => {
+        const p0 = fn(0.4, 0.2);
+        const p = projector.project(p0.xp, p0.yp, p0.zp);
+        p.x = p.x + width;
+        return p;
+      },
+      line: (pl, ph) => {
+        return `
+          M${pl.x},${pl.y}
+
+          L${pl.x     },${pl.y - 10}
+
+          C${pl.x     },${pl.y - 40}
+           ${pl.x     },${pl.y - 40}
+           ${pl.x + 30},${pl.y - 40}
+
+          L${ph.x - 30},${pl.y - 40}
+
+          C${ph.x     },${pl.y - 40}
+           ${ph.x     },${pl.y - 40}
+           ${ph.x     },${pl.y - 10}
+
+          L${ph.x},${ph.y - 7}
+        `;
+      }
+    },
+    oncreate() {
+      this.set({
+        low: this.refs.low,
+        high: this.refs.high
+      });
+      setTimeout(() => {this.resize();}, 200);
+    },
+    methods: {
+      scroll: onscroll,
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width / 2});
+      }
+    }
+  }
+</script>

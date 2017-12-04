@@ -1,0 +1,116 @@
+<style>
+  div {
+    display: inline-block;
+    position: relative;
+  }
+  canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: multiply;
+  }
+</style>
+<!-- <:Window on:scroll="measure()" on:resize="measure()" /> -->
+<div
+  style="width: {{displayWidth}}px; height: {{displayHeight}}px;"
+  on:click="select()"
+>
+  <canvas
+    ref:canvas
+    width="{{width}}"
+    height="{{height}}"
+    class="{{(waiting) ? 'waiting' : 'ready'}}"
+  ></canvas>
+</div>
+<script>
+
+export default {
+  data() {
+    return {
+      model: null,
+      modelData: null,
+      displayWidth: 64,
+      displayHeight: 64,
+      width: 64,
+      height: 64,
+      waiting: false,
+      dirty: false,
+      visible: true,
+      alwaysRender: false,
+      dirty: false,
+      priority: 0,
+      sample:[],
+      position: 0,
+      id: Math.random()
+    }
+  },
+  oncreate() {
+    // this.measure();
+    this.observe("visible", (newValue, oldValue) => {
+      const {dirty, model, sample, id} = this.get();
+      if (model && sample) {
+        if (dirty && newValue) {
+          this.render();
+        }
+        // if (newValue === false) {
+        //   model.remove(id);
+        //   this.set({waiting: false});
+        // }
+      }
+    });
+    this.observe("sample", (newValue, oldValue) => {
+      const {visible, model, id} = this.get();
+      if(newValue && newValue !== oldValue) {
+        if (model) model.remove(id);
+        if (visible) {
+          this.render();
+        } else {
+          this.set({dirty: true});
+        }
+      }
+    });
+    this.observe("model", (newValue, oldValue) => {
+      this.render();
+    //   this.measure();
+    //   const {alwaysRender, visible} = this.get();
+    //   if(newValue && newValue !== oldValue) {
+    //     if (visible || alwaysRender) {
+    //       this.render();
+    //     } else {
+    //       this.set({dirty: true});
+    //     }
+    //   }
+    });
+  },
+  methods: {
+    select: function(event) {
+      const {sample, modelData} = this.get();
+      console.log(modelData, sample);
+      this.fire('select', {selectedSample: sample})
+    },
+    measure() {
+      const bb = this.refs.canvas.getBoundingClientRect();
+      const screen = window.innerHeight;
+      this.set({
+        position: bb.top,
+        visible: (bb.top < (window.innerHeight) && bb.bottom > 0)
+      })
+    },
+    render() {
+      this.set({waiting: true});
+      const {model, modelData, sample, width, height, character, priority, position, id} = this.get();
+      if (model) model.metaData = modelData;
+      // let localPriority = (priority === 0 ? -position : priority);
+      if (model && sample && sample.size) {
+        let canvas = this.refs.canvas;
+        let canvasContext = canvas.getContext("2d");
+        model.get(id, [sample, canvasContext])
+          .then(() => {
+            this.set({waiting: false, dirty: false})
+          });
+      }
+    }
+  }
+}
+
+</script>

@@ -1,0 +1,31 @@
+
+{{#each points as point}}
+  <AnalogyRow
+    model={{model}}
+    modelData={{character}}
+    sample={{point}}
+    analogy={{analogy}}
+  />
+{{/each}}
+
+<script>
+  import {Array1D, Scalar} from 'deeplearn';
+  import {range} from 'd3-array';
+  import Sample from 'Sample.html';
+  import AnalogyRow from 'AnalogyRow.html';
+  import {interpolateLinear, linearCombinationNormalized} from 'Utils.ts';
+  import {sans, serif} from 'FontExamples.ts';
+
+  export default {
+    components: {
+      Sample, AnalogyRow
+    },
+    data: function() {
+      return {
+        points: [serif],
+        character: "A",
+        steps: 5
+      }
+    },
+  }
+</script>

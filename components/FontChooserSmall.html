@@ -1,0 +1,137 @@
+<style>
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+  }
+  .font {
+    display: block;
+    float: left;
+    position: relative;
+    width: 45px;
+    height: 45px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    margin: 3px;
+    padding: 3px;
+    overflow: hidden;
+    position: relative;
+    /* background: hsl(0, 0%, 95%); */
+    background: hsl(0, 0%, 100%);
+    transition-timing-function: ease-in-out;
+    transition-property: box-shadow, transform;
+    transition-duration: 0.1s;
+    flex: 0 0 auto;
+  }
+  .font:hover {
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    /* border: 1px solid rgba(255, 100, 0, 1); */
+    transform: scale(1.1);
+  }
+  .font > div {
+    position: relative;
+    top: 4px;
+  }
+  canvas {
+    image-rendering: auto!important;
+  }
+  .page-controls {
+    text-align: right;
+  }
+</style>
+
+<div class="container">
+  {{#each samples as sample, i}}
+    <div
+      class="font"
+      draggable="true"
+      on:dragstart="ondragstart(event, sample, i)"
+      on:dragend="ondragend(event)"
+    >
+      <Sample
+        displayWidth={{48}}
+        displayHeight={{48}}
+        model="{{model}}"
+        sample="{{sample}}"
+        modelData="{{character}}"
+        on:select="fire('select', event)"
+      />
+    </div>
+  {{/each}}
+</div>
+
+<script>
+import Sample from './Sample.html';
+import {
+  f31207, f1521, f26989, f29116, f28805, f47540, f23816, f35597, f48380, f15846, f12220, f8600, f7377, f10418, f21113, f11952, f24920, f48543, f43581, f20042, f33246, f25845, f31989, f48282, f13315, f1305, f1309, f1326, f1337, f1349, f1306, f1311, f1334, f1399, f1976, f1956, f2243, f2328, f3233, f1257, f1332, f1283
+} from 'FontExamples.ts';
+export default {
+  components: {
+    Sample
+  },
+  data() {
+    return {
+      examples: [
+        f31207, f1521, f26989, f29116, f28805, f47540, f23816, f35597, f48380, f15846, f12220, f8600, f7377, f10418, f21113, f11952, f24920, f48543, f43581, f20042, f33246, f25845, f31989, f48282, f13315, f1305, f1309, f1326, f1337, f1349, f1306, f1311, f1334, f1399, f1976, f1956, f2243, f2328, f3233, f1257, f1332, f1283
+      ],
+      character: "A",
+      page: 29,
+      fontsPerPage: 45
+    }
+  },
+  computed: {
+    // examples: (page, fontsPerPage) => {
+    //   const examples = [];
+    //   for(let i = page * fontsPerPage; examples.length < fontsPerPage; i++) {
+    //     examples.push(i);
+    //   }
+    //   return examples;
+    // },
+    samples: (examples, model) => {
+      if (model) {
+        return examples;
+      } else {
+        return [];
+      }
+    }
+  },
+  oncreate() {
+
+  },
+  methods: {
+    nextPage: function() {
+      let p = this.get("page");
+      p = p + 1;
+      this.set({page: p});
+    },
+    previousPage: function() {
+      let p = this.get("page");
+      p = p - 1;
+      this.set({page: p});
+    },
+    refresh: function() {
+      const examples = [];
+      for(let i = 0; i < 100; i++) {
+        examples.push(Math.round(Math.random() * 50000))
+      }
+      this.set({examples});
+    },
+    ondragstart: function(event, sample, i) {
+      const examples = this.get("examples");
+      event.dataTransfer.setData("sample", sample);
+      event.dataTransfer.setData("array", "[" + sample.getValues().join(",") + "]");
+      event.dataTransfer.setData("example", examples[i]);
+      event.effectAllowed = "copy";
+     },
+    ondragend: function(event) {
+      // console.log("dragend", event);
+    }
+  }
+
+}
+
+</script>

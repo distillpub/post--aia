@@ -1,0 +1,115 @@
+<style>
+  .root {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+  }
+  svg {
+    width: 100%;
+  }
+  svg .plot {
+    stroke: rgb(255, 102, 0);
+    stroke-width: 4px;
+    fill: none;
+  }
+  .description {
+    max-width: 250px;
+  }
+  .description .equation {
+    font-family: Georgia;
+    font-size: 1.6em;
+    margin-top: 100px;
+    color: rgb(255, 102, 0);
+    margin-bottom: 12px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .description .equation > span {
+    font-style: italic;
+  }
+  .axis line {
+    stroke: black;
+    stroke-opacity: 0.2;
+  }
+  .axis text {
+    fill: black;
+    fill-opacity: 0.4;
+    font-size: 10px;
+  }
+  .axis.x {
+    text-anchor: start;
+  }
+  .axis.y {
+    text-anchor: middle;
+  }
+  .tick line {
+    stroke-opacity: 0.4;
+  }
+  .domain {
+    stroke-opacity: 0.4;
+  }
+</style>
+
+<div ref:root class="root grid">
+  <div>
+    <svg ref:svg width="{{width}}" height="{{height}}" viewBox="0 0 {{width}} {{height}}" preserveAspectRatio="xMidYMid meet">
+      <g transform="translate({{margin.left}},{{margin.top}})">
+        <g class="plot">
+          <ellipse
+            cx="{{x(0)}}"
+            cy="{{y(0)}}"
+            rx="{{x(1) - x(0)}}"
+            ry="{{y(0) - y(1)}}"
+          ></ellipse>
+        </g>
+        <g class="x axis">
+          <line x1="{{x(0)}}" y1="{{y(1.5)}}" x2="{{x(0)}}" y2="{{y(-1.5)}}"></line>
+          {{#each ticks as tick}}
+            <g transform="translate({{x(0)}}, {{y(tick)}})">
+              <line x1="-2" x2="2"></line>
+              <text dx="6" dy="4">{{tick}}</text>
+            </g>
+          {{/each}}
+        </g>
+        <g class="y axis">
+          <line x1="{{x(1.5)}}" y1="{{y(0)}}" x2="{{x(-1.5)}}" y2="{{y(0)}}"></line>
+          {{#each ticks as tick}}
+            <g transform="translate({{x(tick)}}, {{y(0)}})">
+              <line y1="-2" y2="2"></line>
+              <text dy="12">{{tick}}</text>
+            </g>
+          {{/each}}
+        </g>
+      </g>
+    </svg>
+  </div>
+  <div class="description">
+    <div class="equation"><span>x</span><sup>2</sup> + <span>y</span><sup>2</sup> = 1</div>
+    <figcaption>While it may seem obvious now, it is remarkable that a geometric shape and an equation can represent the same underlying mathematical object.</figcaption>
+  </div>
+</div>
+
+<script>
+  import {scaleLinear} from 'd3-scale';
+
+  const xScale = scaleLinear();
+  const yScale = scaleLinear();
+
+  export default {
+    data() {
+      return {
+        width: 300,
+        height: 300,
+        margin: {top: 10, right: 10, bottom: 10, left: 10},
+        ticks: [-1.5, -1, -0.5, 0.5, 1, 1.5]
+      }
+    },
+    computed: {
+      x: (width, margin) => {
+        return xScale.domain([-1.5, 1.5]).range([0, width - margin.top - margin.bottom]);
+      },
+      y: (height, margin) => {
+        return yScale.domain([-1.5, 1.5]).range([height - margin.left - margin.right, 0]);
+      }
+    }
+  }
+
+</script>

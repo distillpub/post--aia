@@ -1,0 +1,224 @@
+<style>
+  .root {
+   position: relative;
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   contain: content;
+   margin: -2% 0;
+ }
+ .label {
+   position: absolute;
+   left: 0;
+   top: 0;
+   font-size: 13px;
+ }
+ .column {
+   position: relative;
+ }
+ .column h4 {
+   position: absolute;
+   top: 0;
+ }
+ @media(min-width: 768px) {
+  .column h4 {
+    top: 8%;
+  }
+ }
+ .svg {
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+ }
+ .svg text {
+   font-size: 13px;
+ }
+ text.bolding {
+   font-weight: 700;
+   font-size: 15px;
+ }
+ .average {
+   fill-opacity: 0;
+   stroke: black;
+   stroke-width: 2px;
+   stroke-opacity: 0.4;
+   stroke-dasharray: 2 2;
+ }
+ .arrow {
+   stroke: black;
+   stroke-width: 2;
+   stroke-opacity: 0.5;
+   fill: none;
+ }
+</style>
+
+<:Window on:resize="resize()" on:scroll="scroll()"/>
+
+
+<div ref:root class="root">
+  {{#each examples as example}}
+    <div class="column">
+      <h4>{{example.title}}</h4>
+      <Manifold
+        ref:manifold
+        projector={{projector}}
+        width={{projector.width}}
+        height={{projector.height}}
+        showBoundary={{false}}
+        fn={{fn}}
+      />
+      <svg class="svg">
+        {{#each example.points as p}}
+          <path class="arrow" d="{{p.arrow}}"></path>
+        {{/each}}
+      </svg>
+      <div>
+        {{#each example.points as point}}
+          {{#each point.points as p, i}}
+            <SampleFlag
+              x={{p.point.x}}
+              y={{p.point.y}}
+              width={{flagWidth}}
+              model="{{model}}"
+              modelData="{{character}}"
+              sample="{{p.sample}}"
+            />
+          {{/each}}
+        {{/each}}
+      </div>
+    </div>
+  {{/each}}
+
+</div>
+
+<script>
+  import SampleFlag from 'SampleFlag.html';
+  import {interpolateLinear, linearCombinationNormalized, linearCombination, direction} from 'Utils.ts';
+  import {Array1D, Scalar} from 'deeplearn';
+  import {serif, serifLight, serifItalic, casual, sans, arched, sansLight, dotMatrix} from 'FontExamples.ts';
+  import {range, mean} from 'd3-array';
+  import Manifold from 'Manifold.html';
+  import {generateArrow} from 'Arrows.ts';
+  import {IsometricProjector} from 'IsometricProjector.ts';
+  import {onscroll} from 'ScrollPosition.ts';
+
+  const ip = new IsometricProjector();
+
+  export default {
+    components: {
+      SampleFlag, Manifold
+    },
+    oncreate() {
+      setTimeout(() => {this.resize();}, 200);
+    },
+    data: function() {
+      return {
+        width: 400,
+        _fonts: [
+          {
+            title: "Assumption",
+            fonts: [
+              {
+                sample: serifLight,
+                amount: Scalar.new(0.4),
+                position: Array1D.new([-0.2, 0.1]),
+                localAnalogy: direction(Array1D.new([0.0, 0.0]), Array1D.new([0.4, 0.0]))
+              },
+              {
+                sample: sansLight,
+                amount: Scalar.new(0.4),
+                position: Array1D.new([-0.2, -0.1]),
+                localAnalogy: direction(Array1D.new([0.0, 0.0]), Array1D.new([0.4, 0.0]))
+              }
+            ]
+          },
+          {
+            title: "Reality",
+            fonts: [
+              {
+                sample: serifLight,
+                amount: Scalar.new(0.4),
+                position: Array1D.new([-0.2, 0.1]),
+                localAnalogy: direction(Array1D.new([0.0, 0.0]), Array1D.new([0.4, +0.1]))
+              },
+              {
+                sample: sansLight,
+                amount: Scalar.new(0.4),
+                position: Array1D.new([-0.2, -0.1]),
+                localAnalogy: direction(Array1D.new([0.0, 0.0]), Array1D.new([0.4, -0.1])),
+              }
+
+            ]
+          }
+        ],
+        character: "A",
+        steps: 5,
+        radius: 0.025,
+        fn: function(xp, yp){ return {xp, yp, zp:0}; }
+      }
+    },
+    computed: {
+      height: width => width / 1.5,
+      flagWidth: width => width > 500 ? 40 : 25,
+      projector: (width, height, angle) => {
+        ip.width = width;
+        ip.height = height;
+        ip.angle = angle;
+        return ip;
+      },
+      fonts: (_fonts, analogy) => {
+        return _fonts.map(example => {
+          if (!analogy) {
+            example.points = [];
+          } else {
+            example.fonts.forEach(f => {
+              f.boldSample = linearCombinationNormalized(f.sample, analogy.direction, f.amount)
+            });
+          }
+          return example;
+        })
+
+
+      },
+      examples: (fonts, pointA, steps, projector) => {
+          return fonts.map(example => {
+            const arr = example.fonts.map(f => {
+              const localAmount = Scalar.new(0.4);
+              const localPoint = linearCombination(f.position, f.localAnalogy, localAmount);
+              const shapes = generateArrow(f.position.get(0), f.position.get(1), localPoint.get(0), localPoint.get(1), .025, 0.01, 0.01)
+                .map(shape => {
+                    return shape.map(p => {
+                      return projector.project(p[0], p[1], 0);
+                    });
+                  });
+              return {
+                points: [
+                  {
+                    point: projector.project(f.position.get(0), f.position.get(1), 0),
+                    sample: f.sample
+                  },
+                  {
+                    point: projector.project(localPoint.get(0), localPoint.get(1), 0),
+                    sample: f.boldSample,
+
+                  }
+                ],
+                arrow: "M" + shapes.map(shape => shape.map(p => p.x + ", " + p.y).join("L"))
+              };
+            });
+            example.points = arr;
+            return example;
+          });
+      },
+    },
+    methods: {
+      scroll: onscroll,
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width / 2});
+      }
+    }
+
+  }
+</script>

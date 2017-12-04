@@ -1,0 +1,187 @@
+<style>
+  .root {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    contain: content;
+  }
+  .points {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  .point {
+    position: absolute;
+    display: flex;
+    align-items: flex-end;
+  }
+  .point > div {
+    display: block;
+  }
+  .point > div.ellipsis {
+    margin-bottom: 15px;
+    font-size: 24px;
+    margin-left: 6px;
+
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  svg circle {
+    fill: black;
+  }
+  svg path {
+    stroke: black;
+    fill: none;
+    stroke-opacity: 0.4;
+  }
+</style>
+
+<:Window on:resize="resize()" on:scroll="scroll()"/>
+
+<div ref:root class="root">
+
+    <Manifold
+      ref:manifold
+      projector={{projector}}
+      width={{projector.width}}
+      height={{projector.height}}
+      fn={{fn}}
+    ></Manifold>
+    <div class="points">
+      {{#each points as point}}
+      <div
+        class="point"
+        style="transform: translate({{manifoldWidth}}px, {{(point.i + 3) * (typeWidth / 4) - 0.5 * (typeWidth / 5) }}px);"
+      >
+        {{#each "ABCDE".split("") as letter}}
+          <div style="width: {{0.8 * (typeWidth / 5)}}px; display: inline-block;">
+            <Sample
+              displayWidth={{typeWidth / 5}}
+              displayHeight={{typeWidth / 5}}
+              model="{{model}}"
+              modelData="{{letter}}"
+              sample="{{point.sample}}"
+            />
+          </div>
+        {{/each}}
+        <div class="ellipsis">…</div>
+      </div>
+      {{/each}}
+    </div>
+
+  <svg>
+      {{#each points as point}}
+        <circle r="3" cx="{{point.x}}" cy="{{point.y}}"></circle>
+        <path d="{{pointerLine(point.x, point.y, point.i, manifoldWidth, typeWidth)}}" transform="translate({{point.x}}, {{point.y}})"></path>
+      {{/each}}
+  </svg>
+
+</div>
+
+
+<script>
+  import Manifold from 'Manifold.html';
+  import Sample from 'Sample.html';
+  import {interpolateLinear} from 'Utils.ts';
+  import {Array1D, Scalar} from 'deeplearn';
+  import {serif as exampleA, casual as exampleB} from 'FontExamples.ts';
+  import {IsometricProjector} from 'IsometricProjector.ts';
+  import {onscroll} from 'ScrollPosition.ts';
+
+  const ip = new IsometricProjector();
+
+  export default {
+    components: {
+      Manifold, Sample
+    },
+    data: function() {
+      return {
+        character: "A",
+        width: 400,
+        pointA: exampleA,
+        pointB: exampleB,
+      }
+    },
+    computed: {
+      typeWidth: width => width / 3,
+      manifoldWidth: width => 2 * width / 3,
+      height: manifoldWidth => manifoldWidth * 1.1,
+      projector: (manifoldWidth, height, angle) => {
+        ip.width = manifoldWidth;
+        ip.height = height;
+        ip.angle = angle;
+        return ip;
+      },
+      pointData: (pointA, pointB, amount, fn) => {
+        const arr = [];
+        const length = 3;
+        for (var i = 0; i < length; i++) {
+          const amount = Scalar.new(i / (length - 1));
+          const x0 = 0.2;
+          const y0 = 0.1 / (5 * 2) - amount.get() / 5;
+          arr.push({
+            i: i,
+            p: fn(x0, y0),
+            sample: interpolateLinear(pointA, pointB, amount)
+          });
+        }
+        return arr;
+      },
+      points: (pointData, projector, rotation) => {
+        return pointData.map(a => {
+          const p = a.p
+          const {x, y} = projector.project(p.xp, p.yp, p.zp);
+          a.x = x;
+          a.y = y;
+          return a;
+        });
+      }
+    },
+    oncreate() {
+      setTimeout(() => {this.resize();}, 200);
+    },
+    methods: {
+      scroll: onscroll,
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width});
+      }
+    },
+    helpers: {
+      pointerLine: function(x0, y0, i, manifoldWidth, typeWidth) {
+        var x = manifoldWidth - x0,
+            y = (i + 3) * (typeWidth / 4) - y0,
+            xSign = (x > 0) - (x < 0),
+            ySign = (y > 0) - (y < 0),
+            r = 0,
+            d = "",
+            a = Math.sqrt(r * r / 2),
+            b = Math.sqrt(r * r - Math.min(y * y, x * x)),
+            c = Math.sqrt(2 * Math.min(x * x, y * y));
+
+        if (x * x + y * y < r * r) {
+          d = "";
+        } else if (c < r) {
+          if (Math.abs(x) > Math.abs(y)) {
+            d = "M" + xSign * b + "," + y + ",L" + x + "," + y
+          } else {
+            d = "M" + x + "," + ySign * b + ",L" + x + "," + y
+          }
+        } else if (Math.abs(x) > Math.abs(y)){
+          d = "M" + xSign * a + "," + ySign * a + ",L" + xSign * Math.abs(y) + "," + y + "L" + x + "," + y;
+        } else {
+          d = "M" + xSign * a + "," + ySign * a + ",L" + x + "," + ySign * Math.abs(x) + "L" + x + "," + y;
+        }
+
+        return d;
+      },
+
+    }
+  }
+</script>

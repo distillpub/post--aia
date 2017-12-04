@@ -1,0 +1,101 @@
+
+<style>
+  h4 {
+    text-align: center;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 3fr 3fr 3fr;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    grid-column-gap: 10px;
+  }
+  .row:first-child {
+    border: none;
+  }
+  .letter {
+    position: relative;
+  }
+  .letter svg {
+    width: 100%;
+  }
+  .letter :not(.normal) svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  .letter svg path {
+    fill: rgb(255, 100, 0);
+    fill-opacity: 0.1;
+    stroke: rgb(255, 100, 0);
+    stroke-width: 2px;
+  }
+  .normal svg path {
+    fill: black;
+    fill-opacity: 0.3;
+    stroke: none;
+  }
+  .label {
+    position: absolute;
+    top: 20px;
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+</style>
+
+<div class="row">
+  <h4></h4>
+  <h4>Naive bolding</h4>
+  <h4>Actual bolding</h4>
+</div>
+
+<div class="row">
+  <div class="letter">
+      <div class="label">Georgia</div>
+    <div class="normal">{{{lettersGeorgia}}}</div>
+  </div>
+  <div class="letter">
+    <div class="normal">{{{lettersGeorgia}}}</div>
+    <div>{{{lettersGeorgiaBoldNaive}}}</div>
+  </div>
+  <div class="letter">
+    <div class="normal">{{{lettersGeorgia}}}</div>
+    <div>{{{lettersGeorgiaBold}}}</div>
+  </div>
+</div>
+<div class="row">
+  <div class="letter">
+      <div class="label">Helvetica</div>
+    <div class="normal">{{{lettersHelvetica}}}</div>
+  </div>
+  <div class="letter">
+    <div class="normal">{{{lettersHelvetica}}}</div>
+    <div>{{{lettersHelveticaBoldNaive}}}</div>
+  </div>
+  <div class="letter">
+    <div class="normal">{{{lettersHelvetica}}}</div>
+    <div>{{{lettersHelveticaBold}}}</div>
+  </div>
+</div>
+
+<script>
+  import lettersGeorgia from 'raw-loader!letters-georgia.svg';
+  import lettersGeorgiaBold from 'raw-loader!letters-georgia-bold.svg';
+  import lettersGeorgiaBoldNaive from 'raw-loader!letters-georgia-bold-naive.svg';
+  import lettersHelvetica from 'raw-loader!letters-helvetica.svg';
+  import lettersHelveticaBold from 'raw-loader!letters-helvetica-bold.svg';
+  import lettersHelveticaBoldNaive from 'raw-loader!letters-helvetica-bold-naive.svg';
+
+  export default {
+    data() {
+      return {
+        lettersGeorgia: lettersGeorgia,
+        lettersGeorgiaBold: lettersGeorgiaBold,
+        lettersGeorgiaBoldNaive: lettersGeorgiaBoldNaive,
+        lettersHelvetica: lettersHelvetica,
+        lettersHelveticaBold: lettersHelveticaBold,
+        lettersHelveticaBoldNaive: lettersHelveticaBoldNaive,
+      }
+    }
+  }
+</script>

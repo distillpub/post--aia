@@ -1,0 +1,86 @@
+<style>
+  .typeface {
+    border-left: 1px solid hsl(24, 0%, 80%);
+    padding-left: 20px;
+    cursor: pointer;
+    opacity: 0.4;
+  }
+  .typeface.selected {
+    border-left: 3px solid hsl(24, 100%, 50%);
+    padding-left: 18px;
+    opacity: 1;
+  }
+  .character {
+    display: inline-block;
+    position: relative;
+    width: 17px;
+    height: 17px;
+    overflow: hidden;
+  }
+  .character > div {
+    position: relative;
+    left: -2px;
+  }
+</style>
+
+
+<div>
+  {{#each samples as sample}}
+    <div
+      class="typeface {{selectedSample == sample ? 'selected' : ''}}"
+      on:click="select(sample)"
+    >
+      {{#each "ABCDEF".split("") as char}}
+      <div class="character">
+        <Sample
+          displayWidth={{20}}
+          displayHeight={{20}}
+          model="{{model}}"
+          modelData="{{char}}"
+          sample="{{sample}}"
+        />
+      </div>
+      {{/each}}
+      …
+    </div>
+  {{/each}}
+</div>
+
+<script>
+import Sample from "./Sample.html";
+
+export default {
+  components: {
+    Sample
+  },
+  data() {
+    return {
+      baseFonts: [],
+      startIndex: 0
+    }
+  },
+  computed: {
+    samples: (baseFonts, model) => {
+      if (model) {
+        return baseFonts;
+      } else {
+        return []
+      }
+    }
+  },
+  oncreate() {
+    this.observe("model", () => {
+      const {startIndex, samples} = this.get();
+      this.select(samples[startIndex]);
+    })
+  },
+  methods: {
+    select: function(sample) {
+      this.set({selectedSample: sample});
+      this.fire("select", sample);
+    }
+  }
+
+}
+
+</script>

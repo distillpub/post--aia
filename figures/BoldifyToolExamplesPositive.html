@@ -1,0 +1,54 @@
+<style>
+ figcaption {
+   margin-top: 0px;
+   margin-bottom: 20px;
+ }
+</style>
+
+<AnalogyRow
+  model={{model}}
+  modelData={{character}}
+  sample={{sans}}
+  analogy={{analogy}}
+/>
+<figcaption>As the font is bolded, the crossbar is lowered to preserve the enclosed negative space</figcaption>
+
+<AnalogyRow
+  model={{model}}
+  modelData={{character}}
+  sample={{serif}}
+  analogy={{analogy}}
+/>
+<figcaption>Height is constant</figcaption>
+
+<AnalogyRow
+  model={{model}}
+  modelData={{character}}
+  sample={{dotMatrix}}
+  analogy={{analogy}}
+/>
+<figcaption>Even non-standard fonts are properly bolded</figcaption>
+
+<script>
+  import Sample from 'Sample.html';
+  import AnalogyRow from 'AnalogyRow.html';
+  import {interpolateLinear, linearCombinationNormalized} from 'Utils.ts';
+  import {Array1D, Scalar} from 'deeplearn';
+  import {sans, serif, dotMatrix} from 'FontExamples.ts';
+  import {range} from 'd3-array';
+
+  export default {
+    components: {
+      Sample, AnalogyRow
+    },
+    data: function() {
+      return {
+        sans: sans,
+        serif: serif,
+        dotMatrix: dotMatrix,
+        character: "A",
+        steps: 5
+      }
+    }
+  }
+</script>

@@ -61,7 +61,7 @@ const boldify = new Boldify({target: document.querySelector('#boldify')});
 import Serifify from '../figures/Serifify.html';
 const serifify = new Serifify({target: document.querySelector('#serifify')});
 
-import BoldifyWithExamples from '../figures/BoldifyWithExamples.html';
+import BoldifyWithExamples from '../figures/BoldifyWithExamplesStatic.html';
 const boldifyWithExamples = new BoldifyWithExamples({target: document.querySelector('#boldify-with-examples')});
 
 import Descartes from '../figures/Descartes.html';
@@ -156,9 +156,6 @@ const igansMinimization = new IgansMinimization({
   }
 });
 
-//
-// Initialize and load the font weights. Can be quite large
-//
 
 function centroid(model, samples) {
   if (samples.length) {
@@ -176,6 +173,15 @@ function averageMagnitude(samples) {
     return Scalar.new(0);
   }
 }
+
+
+//
+// Initialize and load the font weights. Can be quite large
+//
+
+document.querySelector("#boldify").addEventListener("ready", () => {
+  console.log("ready");
+});
 
 const fonts = new FontModel();
 fonts.load(() => {

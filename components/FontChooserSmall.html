@@ -80,7 +80,8 @@ export default {
       ],
       character: "A",
       page: 29,
-      fontsPerPage: 45
+      fontsPerPage: 45,
+      scroll: 0
     }
   },
   computed: {
@@ -121,13 +122,17 @@ export default {
       this.set({examples});
     },
     ondragstart: function(event, sample, i) {
-      const examples = this.get("examples");
+
+      const {examples, scroll} = this.get();
       event.dataTransfer.setData("sample", sample);
       event.dataTransfer.setData("array", "[" + sample.getValues().join(",") + "]");
       event.dataTransfer.setData("example", examples[i]);
       event.effectAllowed = "copy";
+      this.set({scroll: window.scrollY});
      },
     ondragend: function(event) {
+      console.log(document.activeElement);
+      window.scrollTo(0, this.get("scroll"))
       // console.log("dragend", event);
     }
   }

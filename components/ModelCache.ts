@@ -17,7 +17,6 @@ export class Cache {
   }
 
   get(id: number, argsArray: Array<{}>) {
-    // console.log((argsArray[0] as Array1D).dataSync())
     return new Promise((resolve, reject) => {
       //TODO actually cache/retrieve the values.
       // resolve(value) if id is in the cache
@@ -25,7 +24,9 @@ export class Cache {
 
       this.queue.add(() => {
         const value = this.fn.call(this.thisArg, argsArray);
-        this.fn.call(this.thisArg, argsArray);
+        // this.fn.call(this.thisArg, argsArray);
+        // console.log((argsArray[0] as Array1D).dataSync(), value)
+
         resolve(value);
       }, id, 0);
     });

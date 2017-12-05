@@ -17,11 +17,11 @@ export class Cache {
   }
 
   get(id: number, argsArray: Array<{}>) {
-    console.log((argsArray[0] as Array1D).dataSync())
+    // console.log((argsArray[0] as Array1D).dataSync())
     return new Promise((resolve, reject) => {
       //TODO actually cache/retrieve the values.
       // resolve(value) if id is in the cache
-      console.log(id);
+      // console.log(id);
 
       this.queue.add(() => {
         const value = this.fn.call(this.thisArg, argsArray);

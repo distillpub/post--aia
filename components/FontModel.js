@@ -108,7 +108,8 @@ export default class Model {
 
     const d = adjusted.as3D(IMAGE_SIZE, IMAGE_SIZE, 1);
 
-    d.data().then(() => {
+    // d.data(() =
+    d.dataSync();
       const imageData = ctx.createImageData(IMAGE_SIZE, IMAGE_SIZE);
 
       let pixelOffset = 0;
@@ -124,9 +125,10 @@ export default class Model {
 
       ctx.putImageData(imageData, 0, 0);
 
-      d.dispose();
+      // d.dispose();
 
       cb();
-    });
+      // });
+    return d;
   }
 }

@@ -197,6 +197,8 @@ analogies.forEach(a => {
 
 fonts.load(() => {
   fonts.init();
+  boldify.set({loading: false});
+  serifify.set({loading: false});
 });
 
   boldify.set({

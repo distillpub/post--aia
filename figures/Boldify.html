@@ -3,6 +3,19 @@
   width: 100%;
   max-width: 890px;
   margin: 0 auto;
+  position: relative;
+}
+.loading {
+  font-size: 24px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: hsla(200, 20%, 97%, 0.85);
+  color: rgba(0, 0, 0, 0.8);
+  z-index: 10;
+  text-align: center;
+  line-height: 310px;
+  font-weight: 300;
 }
 .container{
   padding: 0 20px;
@@ -35,6 +48,7 @@ h4 {
 
 
 <div class="root">
+  {{#if loading}}<div class="loading">Loading…</div>{{/if}}
   <div class="container">
   <div class="chooser">
     <h4>Starting Font</h4>
@@ -88,6 +102,7 @@ h4 {
     data() {
       return {
         model: null,
+        loading: true,
         selectedSample: null,
         character: "A",
         fonts: [],

@@ -12,7 +12,7 @@ export class Cache {
     this.thisArg = thisArg;
     this.fn = fn;
 
-    this.queue.interval = 100;
+    this.queue.interval = 20;
     this.queue.elementsPerChunk = 26;
   }
 

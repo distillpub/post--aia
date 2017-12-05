@@ -34,24 +34,20 @@ export default class Model {
     for (let i = 48; i < 58; i++) {
       this.charIdMap[String.fromCharCode(i)] = i - 48 + 52;
     }
+    math = new NDArrayMathGPU();
   }
 
   load(cb) {
     const checkpointLoader = new CheckpointLoader('https://storage.googleapis.com/learnjs-data/checkpoint_zoo/fonts/');
     checkpointLoader.getAllVariables().then(vars => {
       variables = vars;
-
       let mathCPU = new NDArrayMathCPU();
-
       // Pad the embeddings with zeros. This makes it not prime so we can upload it to the GPU.
       // This will be fixed in a later version of deeplearn.js, but this will do for now.
       const zeros = Array1D.zeros([1, 40]);
       const axis = 0;
-      // variables['input_from_feature_columns/font_embedding/weights'] =
-      //     mathCPU.concat2D(variables['input_from_feature_columns/font_embedding/weights'],
-      //     zeros, axis);
-      this.inferCache.paused = false;
       cb();
+      this.inferCache.paused = false;
     });
   }
 
@@ -65,13 +61,13 @@ export default class Model {
   }
 
   remove(id) {
-    //TODO
+    // TODO
     // this.queue.remove(id);
   }
 
   init() {
     this.multiplierScalar = Scalar.new(255);
-    math = new NDArrayMathGPU();
+
   }
 
   infer(args) {

@@ -11,6 +11,7 @@ export class Queue {
   private _timeoutID: number;
   private _running: boolean;
   private _queue: QueueItem[];
+  private _paused = true;
 
   constructor() {
     this.interval = 1000;
@@ -38,6 +39,18 @@ export class Queue {
     return this._queue.length;
   }
 
+  set paused(p: boolean) {
+    this._paused = p;
+    if(p === false){
+      this._kick();
+    }
+    console.log("paused", p);
+  }
+
+  get paused() {
+    return this._paused;
+  }
+
   remove(id: number) {
     this._queue = this._queue.filter(item => id !== item.id);
   }
@@ -47,7 +60,7 @@ export class Queue {
   }
 
   _kick() {
-    if (!this._running) {
+    if (!this._running && !this._paused) {
       this._running = true;
       this._timeoutID = setTimeout(this._run.bind(this), this.interval);
     }

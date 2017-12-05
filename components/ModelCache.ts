@@ -1,12 +1,12 @@
 
 import { Queue } from './ChunkedQueue.ts';
+import { Array1D } from 'deeplearn';
 
 export class Cache {
 
   private thisArg: object;
   private fn: (args: Array<{}>) => void;
   private queue = new Queue();
-  private _paused = false;
 
   constructor(thisArg: object, fn: (args: Array<{}>) => void) {
     this.thisArg = thisArg;
@@ -17,11 +17,14 @@ export class Cache {
   }
 
   get(id: number, argsArray: Array<{}>) {
-    //TODO actually cache/retrieve the values.
-
+    console.log((argsArray[0] as Array1D).dataSync())
     return new Promise((resolve, reject) => {
-      const value = this.fn.call(this.thisArg, argsArray);
+      //TODO actually cache/retrieve the values.
+      // resolve(value) if id is in the cache
+      console.log(id);
+
       this.queue.add(() => {
+        const value = this.fn.call(this.thisArg, argsArray);
         this.fn.call(this.thisArg, argsArray);
         resolve(value);
       }, id, 0);
@@ -29,11 +32,11 @@ export class Cache {
   }
 
   set paused(p: boolean) {
-    this._paused = p;
+    this.queue.paused = p;
   }
 
   get paused() {
-    return this._paused;
+    return this.queue.paused;
   }
 
 }

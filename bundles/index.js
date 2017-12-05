@@ -17,6 +17,7 @@ import {
 } from 'FontExamples.ts';
 
 const math = new NDArrayMathCPU(false);
+const fonts = new FontModel();
 
 const baseFonts = [
   f29116, f31207, f47540, f1521, f26989, f28805, f23816
@@ -183,18 +184,20 @@ document.querySelector("#boldify").addEventListener("ready", () => {
   console.log("ready");
 });
 
-const fonts = new FontModel();
+analogies.forEach(a => {
+  a.leftSamples = a.left.map(d => d);
+  a.rightSamples = a.right.map(d => d);
+  a.leftAverageMagnitude = averageMagnitude(a.leftSamples).get();
+  a.rightAverageMagnitude = averageMagnitude(a.rightSamples).get();
+  a.leftCentroid = centroid(fonts, a.leftSamples);
+  a.rightCentroid = centroid(fonts, a.rightSamples);
+  a.direction = unit(math.sub(a.rightCentroid, a.leftCentroid));
+});
+
+
 fonts.load(() => {
   fonts.init();
-  analogies.forEach(a => {
-    a.leftSamples = a.left.map(d => d);
-    a.rightSamples = a.right.map(d => d);
-    a.leftAverageMagnitude = averageMagnitude(a.leftSamples).get();
-    a.rightAverageMagnitude = averageMagnitude(a.rightSamples).get();
-    a.leftCentroid = centroid(fonts, a.leftSamples);
-    a.rightCentroid = centroid(fonts, a.rightSamples);
-    a.direction = unit(math.sub(a.rightCentroid, a.leftCentroid));
-  });
+});
 
   boldify.set({
     model: fonts,
@@ -242,6 +245,6 @@ fonts.load(() => {
     model: fonts,
     analogy: analogies[0]
   });
-});
+// });
 
 

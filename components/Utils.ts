@@ -65,8 +65,3 @@ export function unit(v) {
   return math.arrayDividedByScalar(v, n);
 };
 
-//
-export function arrayToString(arr:Array1D) {
-  return "";
-}
-

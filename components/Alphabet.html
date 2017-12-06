@@ -4,7 +4,7 @@
   }
 </style>
 <div>
-{{#each "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("") as char}}
+{{#each letters.split("") as char}}
   <div class="character">
     <Sample
       displayWidth={{48}}
@@ -24,6 +24,11 @@ import Sample from "./Sample.html";
 export default {
   components: {
     Sample
+  },
+  data() {
+    return {
+      letters: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    }
   }
 }
 </script>

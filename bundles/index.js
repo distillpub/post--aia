@@ -7,7 +7,7 @@ import {IsometricProjector as Projector} from 'IsometricProjector.ts';
 import {font as fontFunction} from 'ManifoldFunctions.ts';
 
 import {
-  f31207, f47540, f1521, f26989, f29116, f28805, f23816,
+  f31207, f1521, f26989, f29116, f28805, f23816,
   f1283,f1257,f1332,f1497,f1509,f1590,f1580,f1649,f1971,f1992,f2003,f2127,f2266,f2592,f2561,f4465,
   f7238,f1557,f24314,f46774,f19558,f38134,f20907,f11500,f35559,f18778,f34845,f39762,f13192,f2490,f2528,f2558,
   f2369,f2557,f2646,f2654,f2722,f2766,f2807,f2856,f2907,f2980,f3071,f3117,f3558,f3801,f3957,f4086,
@@ -20,7 +20,7 @@ const math = new NDArrayMathCPU(false);
 const fonts = new FontModel();
 
 const baseFonts = [
-  f29116, f31207, f47540, f1521, f26989, f28805, f23816
+  f29116, f31207, f1521, f26989, f28805, f23816
 ];
 
 const analogies = [

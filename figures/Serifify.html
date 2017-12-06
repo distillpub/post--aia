@@ -43,12 +43,20 @@ h4 {
 
 .controls {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1.5fr;
+  grid-template-columns: 1.1fr 1.5fr 2fr;
   grid-column-gap: 20px;
+}
+.sliders{
+  padding: 0 20px;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 </style>
-<div class="root">
+
+<:Window on:resize="resize()" />
+
+<div ref:root class="root">
   {{#if loading}}<div class="loading">Loading…</div>{{/if}}
   <div class="container">
   <div>
@@ -56,6 +64,7 @@ h4 {
       model="{{model}}"
       on:select="changeSelected(event)"
       character="{{character}}"
+      chipWidth="{{chipWidth}}"
     />
   </div>
   <div class="buckets">
@@ -77,9 +86,10 @@ h4 {
         model="{{model}}"
         on:select="changeSelected(event)"
         baseFonts="{{baseFonts}}"
+        letters="{{chooserLetters}}"
         />
     </div>
-    <div>
+    <div class="sliders">
       <h4>Apply your new tool</h4>
       <Slider
         min="{{-1}}"
@@ -93,6 +103,7 @@ h4 {
       <Alphabet
         model="{{model}}"
         sample="{{outputSample}}"
+        letters="{{letters}}"
       />
     </div>
   </div>
@@ -129,13 +140,20 @@ h4 {
         toolMagnitude: 0.25,
         userTool: {},
         fonts: [],
-
+        width: 400,
         baseFonts: [],
         buckets: [{label:"sans-serif", samples:[]}, {label:"serif", samples:[]}],
         extrapolations: [-0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8]
       }
     },
     computed: {
+      chipWidth: (width) => { return (width < 768) ? 36 : 48 },
+      letters: (width) =>  {
+        return (width < 768) ? "ABCDEF" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      },
+      chooserLetters: (width) =>  {
+        return (width < 768) ? "ABC" : "ABCDEF";
+      },
       typefaces: (baseFonts, model) => {
         if (model) {
           return baseFonts
@@ -171,7 +189,14 @@ h4 {
         }
       }
     },
+    oncreate() {
+      this.resize();
+    },
     methods: {
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width});
+      },
       changeSelected: function(selectedSample) {
         this.set({selectedSample})
       }

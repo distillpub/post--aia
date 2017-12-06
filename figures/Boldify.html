@@ -19,24 +19,21 @@
 }
 .container{
   padding: 0 20px;
-  display: flex;
-
+  display: grid;
+  grid-template-columns: 1.1fr 1.5fr 2fr;
+  grid-column-gap: 20px;
 }
 h4 {
   margin-top: 0;
 }
 .chooser {
-  width: 180px;
 }
 .sliders {
-  width: 40%;
   padding: 0 20px;
-  margin: 0 20px;
   border-left: 1px solid rgba(0, 0, 0, 0.1);
   border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 .output {
-  width: 40%;
 }
 
 .label {
@@ -46,8 +43,9 @@ h4 {
 }
 </style>
 
+<:Window on:resize="resize()" />
 
-<div class="root">
+<div ref:root class="root">
   {{#if loading}}<div class="loading">Loading…</div>{{/if}}
   <div class="container">
   <div class="chooser">
@@ -56,6 +54,7 @@ h4 {
       model="{{model}}"
       on:select="changeSelected(event)"
       baseFonts="{{baseFonts}}"
+      letters="{{chooserLetters}}"
     />
   </div>
 
@@ -79,6 +78,7 @@ h4 {
     <Alphabet
       model="{{model}}"
       sample="{{outputVector}}"
+      letters="{{letters}}"
     />
   </div>
 </div>
@@ -101,6 +101,7 @@ h4 {
     },
     data() {
       return {
+        width: 400,
         model: null,
         loading: true,
         selectedSample: null,
@@ -111,6 +112,12 @@ h4 {
       }
     },
     computed: {
+      letters: (width) =>  {
+        return (width < 768) ? "ABCDEF" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      },
+      chooserLetters: (width) =>  {
+        return (width < 768) ? "ABC" : "ABCDEF";
+      },
       computedAnalogies: (analogies, model) => {
         if (!model) {
           return [];
@@ -122,9 +129,14 @@ h4 {
     oncreate() {
       this.observe("selectedSample", () => {
         this.update();
-      })
+      });
+      this.resize();
     },
     methods: {
+      resize: function() {
+        const bb = this.refs.root.getBoundingClientRect();
+        this.set({width: bb.width});
+      },
       changeSelected: function(selectedSample) {
         const {analogies} = this.get();
         analogies.forEach(a => {

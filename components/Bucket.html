@@ -18,6 +18,7 @@
       box-shadow: inset 0 1px 7px rgba(0, 0, 0, 0.1);
       min-height: 40px;
       position: relative;
+      display: flex;
     }
     .column.active {
       border-color: rgb(255, 100, 0);
@@ -29,8 +30,10 @@
       pointer-events: none;
       text-align: center;
       position: absolute;
-      width: 100%;
-      top: calc(50% - 13px);
+      width: calc(100% - 40px);
+      /* top: calc(50% - 13px); */
+      align-self: center;
+      margin: 0 21px;
     }
     .prompt.visible {
       display: block;

@@ -1,13 +1,13 @@
 <style>
   .typeface {
     border-left: 1px solid hsl(24, 0%, 80%);
-    padding-left: 20px;
+    padding-left: 15px;
     cursor: pointer;
     opacity: 0.4;
   }
   .typeface.selected {
     border-left: 3px solid hsl(24, 100%, 50%);
-    padding-left: 18px;
+    padding-left: 13px;
     opacity: 1;
   }
   .character {
@@ -30,7 +30,7 @@
       class="typeface {{selectedSample == sample ? 'selected' : ''}}"
       on:click="select(sample)"
     >
-      {{#each "ABCDEF".split("") as char}}
+      {{#each letters.split("") as char}}
       <div class="character">
         <Sample
           displayWidth={{20}}
@@ -56,7 +56,8 @@ export default {
   data() {
     return {
       baseFonts: [],
-      startIndex: 0
+      startIndex: 0,
+      letters: "ABCDEF"
     }
   },
   computed: {

@@ -1,0 +1,73 @@
+<style>
+  h4 {
+    text-align: center;
+  }
+  .title {
+    height: 190px;
+  }
+  .label {
+    margin-top: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.3em;
+  }
+  d-slider {
+    width: 100%;
+  }
+  .output {
+    text-align: center;
+    overflow: hidden;
+  }
+  .output img {
+    height: 140px;
+    width: auto;
+    margin: auto 0;
+  }
+  .output > * {
+    display: none;
+  }
+  .output.index-0 > :nth-child(1) {
+    display: inline-block;
+  }
+  .output.index-1 > :nth-child(2) {
+    display: inline-block;
+  }
+  .output.index-2 > :nth-child(3) {
+    display: inline-block;
+  }
+  .output.index-3 > :nth-child(4) {
+    display: inline-block;
+  }
+  .output.index-4 > :nth-child(5) {
+    display: inline-block;
+  }
+</style>
+
+<div class="title">
+  <h4>Faces</h4>
+  <div class="output index-{{index}}">
+    <img src="images/smile-0.jpg">
+    <img src="images/smile-1.jpg">
+    <img src="images/smile-2.jpg">
+    <img src="images/smile-3.jpg">
+    <img src="images/smile-4.jpg">
+  </div>
+</div>
+<Slider min="0" max="4" origin="2" step="1" ticks="5" bind:value="index"></Slider>
+<div class="label">Smiling</div>
+
+
+<script>
+  import Slider from 'Slider.html';
+
+  export default {
+    components: {
+      Slider
+    },
+    data() {
+      return {
+        index: 0,
+      }
+    }
+  }
+</script>

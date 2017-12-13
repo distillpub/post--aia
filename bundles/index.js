@@ -71,8 +71,12 @@ new Descartes({target: document.querySelector('#descartes')});
 import BoldNaive from '../figures/BoldNaive.html';
 new BoldNaive({target: document.querySelector('#bold-naive')});
 
-import AlternateUses from '../figures/AlternateUses.html';
-new AlternateUses({target: document.querySelector('#alternate-uses')});
+import AlternateUsesFaces from '../figures/AlternateUsesFaces.html';
+new AlternateUsesFaces({target: document.querySelector('#alternate-uses .faces')});
+import AlternateUsesSentences from '../figures/AlternateUsesSentences.html';
+new AlternateUsesSentences({target: document.querySelector('#alternate-uses .sentences')});
+import AlternateUsesMolecules from '../figures/AlternateUsesMolecules.html';
+new AlternateUsesMolecules({target: document.querySelector('#alternate-uses .molecules')});
 
 import LatentSpaceTypeface from '../figures/LatentSpaceTypeface.html';
 new LatentSpaceTypeface({

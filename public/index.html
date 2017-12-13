@@ -453,7 +453,53 @@
     chemical properties:
   </p>
 
+  <style>
+    #alternate-uses .root {
+      max-width: 300px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    @media(min-width: 600px) {
+      #alternate-uses .root {
+        max-width: 760px;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-gap: 50px;
+      }
+    }
+    .note {
+      margin-top: 12px;
+      grid-column-end: span 2;
+      font-size: 10px;
+      line-height: 1.5em;
+      text-align: left;
+      color: rgba(0, 0, 0, 0.4);
+    }
+  </style>
   <figure id="alternate-uses" style="grid-column: screen">
+
+    <div class="root">
+      <div class="column">
+        <div class="faces"></div>
+        <div class="note">
+          Images from <em>Sampling Generative Networks</em> by <d-cite key="White2016a">White</d-cite>.
+        </div>
+      </div>
+      <div class="column">
+        <div class="sentences"></div>
+        <div class="note">
+          Sentence from <em>Pride and Prejudice</em> by Jane Austen. Interpolated by the authors. Inspired by experiments done by the novelist <d-cite key="Sloan2017">Robin Sloan</d-cite>
+        </div>
+      </div>
+      <div class="column">
+        <div class="molecules"></div>
+        <div class="note">
+          Images from <em>Automatic chemical design using a data-driven continuous representation of molecules</em> by <d-cite key="GomezBombarelli2016">Gómez-Bombarelli <em>et al</em></d-cite>.
+        </div>
+      </div>
+
+
+    </div>
   </figure>
 
   <p>

@@ -1,0 +1,88 @@
+<style>
+  h4 {
+    text-align: center;
+  }
+  .title {
+    height: 190px;
+  }
+  .quote {
+    font-family: georgia, serif;
+    text-align: center;
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.5em;
+    color: rgba(0, 0, 0, 0.5);
+  }
+  .label {
+    margin-top: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    line-height: 1.3em;
+  }
+  d-slider {
+    width: 100%;
+  }
+  .output {
+    text-align: center;
+    overflow: hidden;
+  }
+  .output > * {
+    display: none;
+  }
+  .output.index-0 > :nth-child(1) {
+    display: inline-block;
+  }
+  .output.index-1 > :nth-child(2) {
+    display: inline-block;
+  }
+  .output.index-2 > :nth-child(3) {
+    display: inline-block;
+  }
+  .output.index-3 > :nth-child(4) {
+    display: inline-block;
+  }
+  .output.index-4 > :nth-child(5) {
+    display: inline-block;
+  }
+</style>
+
+<div class="title">
+  <h4>Sentences</h4>
+  <div class="output index-{{sentenceIndex}}">
+    <div class="quote">
+      “It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.”
+    </div>
+    <div class="quote">
+      “It is universally acknowledged that a rich, single man, must be in want of a wife.”
+    </div>
+    <div class="quote">
+      “Everyone knows that a rich, single man must want a wife.”
+    </div>
+    <div class="quote">
+      “A rich, single man obviously must want a wife.”
+    </div>
+    <div class="quote">
+      “A single man must want a wife.”
+    </div>
+  </div>
+</div>
+<Slider min="0" max="4" origin="2" step="1" ticks="5" bind:value="sentenceIndex"></Slider>
+<div class="label">Length</div>
+
+
+<script>
+  import Slider from 'Slider.html';
+
+  export default {
+    components: {
+      Slider
+    },
+    data() {
+      return {
+        faceIndex: 0,
+        sentenceIndex: 0,
+        moleculeIndex: 0
+      }
+    }
+  }
+</script>
